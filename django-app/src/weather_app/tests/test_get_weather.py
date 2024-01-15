@@ -1,5 +1,8 @@
 import pytest
 from weather_app.services import CityNotFoundError, get_actual_weather
+from faker import Faker
+
+faker = Faker()
 
 
 @pytest.mark.django_db
@@ -13,6 +16,6 @@ def test_get_actual_weather(city):
 
 @pytest.mark.django_db
 def test_get_weather_city_not_found():
-    city_name = "blabla"
+    city_name = faker.city()
     with pytest.raises(CityNotFoundError):
         _, _, _ = get_actual_weather(city_name)
