@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  db:
+    container_name: postgres-db
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  web:
+    container_name: web
+    build:
+      context: ./django-app
+      dockerfile: ./Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./django-app/src:/app
+    ports:
+      - "8000:8000"
+    environment:
+      API_KEY: "<API_KEY>"
+    depends_on:
+      - db
+      - bot
+    restart: always
+
+  bot:
+    container_name: bot
+    build:
+      context: ./bot-app
+      dockerfile: ./Dockerfile
+    command: python3 bot_main.py
+    volumes:
+      - ./bot-app/src:/app
+    ports:
+      - "8080:8080"
+    environment:
+      TOKEN: "<TOKEN>"
+      API_HOST: web
+    restart: always
+
+  tests:
+    build:
+      context: ./django-app
+      dockerfile: ./Dockerfile_test
